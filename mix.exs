@@ -30,7 +30,7 @@ defmodule AbsintheCache.MixProject do
       {:absinthe_plug, ">= 0.0.0"},
       {:con_cache, ">= 0.14.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:inflex, "~> 2.0.0"},
+      {:inflex, "~> 2.1.0"},
       {:jason, ">= 1.1.2"}
     ]
   end
