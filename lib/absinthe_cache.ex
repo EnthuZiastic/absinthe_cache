@@ -28,7 +28,7 @@ defmodule AbsintheCache do
 
   alias __MODULE__, as: CacheMod
   # TODO: Make configurable
-  alias AbsintheCache.ConCacheProvider, as: CacheProvider
+  alias AbsintheCache.RedisProvider, as: CacheProvider
 
   @doc ~s"""
   Macro that's used instead of Absinthe's `resolve`. This resolver can perform

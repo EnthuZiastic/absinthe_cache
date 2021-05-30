@@ -31,7 +31,8 @@ defmodule AbsintheCache.MixProject do
       {:con_cache, ">= 0.14.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:inflex, "~> 2.1.0"},
-      {:jason, ">= 1.1.2"}
+      {:jason, ">= 1.1.2"},
+      {:redix, ">= 0.0.0"}
     ]
   end
 
