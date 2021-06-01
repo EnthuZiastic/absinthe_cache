@@ -24,14 +24,13 @@ defmodule AbsintheCache.RedisProvider do
   @impl true
   def get(_, {key, _}) do
     {:ok, conn} = Redix.start_link(System.get_env("REDIS_URL", "redis://127.0.0.1:6379"))
-
-    case Redix.command(conn, ["GET", key]) |> IO.inspect() do
+    case Redix.command(conn, ["GET", key]) do
       {:ok, value} ->
         value
-
       _ ->
         nil
     end
+
   end
 
   @impl true
@@ -51,21 +50,15 @@ defmodule AbsintheCache.RedisProvider do
 
   @impl true
   def get_or_store(cache, {key, _}, func, cache_modify_middleware) do
-    IO.puts("IN GET OR STORE")
-    IO.inspect(cache)
-    IO.inspect(key)
     {:ok, conn} = Redix.start_link(System.get_env("REDIS_URL", "redis://127.0.0.1:6379"))
-
     {result, error_if_any} =
-      case Redix.command(conn, ["GET", key]) |> IO.inspect() do
+      case Redix.command(conn, ["GET", key]) do
         {:ok, value} when value != nil ->
-          IO.puts("VALUE HAI")
-          IO.inspect(VALUE)
-          value = Jason.decode!(value)
+          value = Jason.decode!(value) |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
           {{:ok, value}, nil}
 
         _ ->
-          case func.() |> IO.inspect() do
+          case func.() do
             {:error, _} = error ->
               {nil, error}
 
@@ -78,15 +71,10 @@ defmodule AbsintheCache.RedisProvider do
               {value, nil}
 
             {:ok, value} ->
-              IO.puts("VALUE HAI, CACHE ADD KAROu")
-              cache_item(cache, key, Jason.encode!(value)) |> IO.inspect()
+              cache_item(cache, key, Jason.encode!(value))
               {{:ok, value}, nil}
           end
       end
-
-    IO.puts("IN END")
-    IO.inspect(result)
-    IO.inspect(error_if_any)
 
     if error_if_any != nil do
       # Logger.warn("Somethting went wrong...")
@@ -97,17 +85,12 @@ defmodule AbsintheCache.RedisProvider do
   end
 
   defp cache_item(_, {_, ttl} = key, value) when is_integer(ttl) and ttl <= @max_cache_ttl do
-    IO.puts("IN CACHE ITEM 1")
-    IO.inspect(key)
-    IO.inspect(value)
     {:ok, conn} = Redix.start_link(System.get_env("REDIS_URL", "redis://127.0.0.1:6379"))
     Redix.command(conn, ["SET", key, value])
+
   end
 
   defp cache_item(_, key, value) do
-    IO.puts("IN CACHE ITEM")
-    IO.inspect(key)
-    IO.inspect(value)
     {:ok, conn} = Redix.start_link(System.get_env("REDIS_URL", "redis://127.0.0.1:6379"))
     Redix.command(conn, ["SET", key, value])
   end
